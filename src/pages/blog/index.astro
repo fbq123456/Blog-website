@@ -1,0 +1,372 @@
+---
+import { getCollection } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+
+// 获取文章列表
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// 收集所有标签
+const allTags = [...new Set(posts.flatMap(post => post.data.tags))];
+
+// 格式化日期
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+---
+
+<BlogLayout title="文章列表">
+  <section class="blog-page">
+    {/* 背景光效 */}
+    <div class="page-glow"></div>
+    
+    <div class="container">
+      <header class="page-header">
+        <div class="header-content">
+          <h1 class="page-title animate-fade-in-up">
+            <span class="title-accent">/</span> 所有文章
+          </h1>
+          <p class="page-subtitle animate-fade-in-up stagger-1">
+            共 <span class="count">{posts.length}</span> 篇文章，持续更新中...
+          </p>
+        </div>
+      </header>
+
+      <div class="blog-layout">
+        <aside class="blog-sidebar">
+          <div class="sidebar-card glass-card">
+            <h3 class="sidebar-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/>
+                <path d="M7 7h.01"/>
+              </svg>
+              标签筛选
+            </h3>
+            <div class="tags-list">
+              <button class="tag-btn active" data-tag="all">
+                <span class="tag-btn-dot"></span>
+                全部
+              </button>
+              {allTags.map(tag => (
+                <button class="tag-btn" data-tag={tag}>
+                  <span class="tag-btn-dot"></span>
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <main class="blog-main">
+          <div class="posts-list" id="posts-list">
+            {posts.map((post, index) => (
+              <a 
+                href={`/blog/${post.id}`} 
+                class={`post-item glass-card animate-fade-in-up stagger-${Math.min(index + 1, 7)}`}
+                data-tags={post.data.tags.join(',')}
+              >
+                <div class="post-item-glow"></div>
+                <div class="post-item-inner">
+                  <div class="post-item-header">
+                    <time class="post-item-date mono">{formatDate(post.data.pubDate)}</time>
+                    <div class="post-item-tags">
+                      {post.data.tags.map(tag => <span class="tag">{tag}</span>)}
+                    </div>
+                  </div>
+                  <h2 class="post-item-title">{post.data.title}</h2>
+                  <p class="post-item-description">{post.data.description}</p>
+                  <div class="post-item-footer">
+                    <span class="read-more">
+                      阅读全文
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"/>
+                        <path d="m12 5 7 7-7 7"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+</BlogLayout>
+
+<script>
+  // 标签筛选功能
+  const tagBtns = document.querySelectorAll('.tag-btn');
+  const postItems = document.querySelectorAll('.post-item');
+
+  tagBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag');
+      
+      // 更新按钮状态
+      tagBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // 筛选文章
+      postItems.forEach(item => {
+        const tags = item.getAttribute('data-tags')?.split(',') || [];
+        if (tag === 'all' || tags.includes(tag || '')) {
+          (item as HTMLElement).style.display = 'block';
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .blog-page {
+    position: relative;
+    padding: calc(72px + var(--space-3xl)) 0 var(--space-4xl);
+    min-height: 100vh;
+  }
+
+  .page-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse at center top, rgba(88, 166, 255, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .page-header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .page-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: var(--space-sm);
+  }
+
+  .title-accent {
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+  }
+
+  .page-subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+  }
+
+  .count {
+    color: var(--color-accent);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  .blog-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--space-3xl);
+  }
+
+  .blog-sidebar {
+    position: sticky;
+    top: calc(72px + var(--space-xl));
+    height: fit-content;
+  }
+
+  .sidebar-card {
+    padding: var(--space-lg);
+    border-radius: var(--radius-xl);
+  }
+
+  .sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .sidebar-title svg {
+    color: var(--color-accent);
+  }
+
+  .tags-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .tag-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+    text-align: left;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .tag-btn-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--color-border);
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+  }
+
+  .tag-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+  }
+
+  .tag-btn:hover .tag-btn-dot {
+    background: var(--color-accent-secondary);
+  }
+
+  .tag-btn.active {
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
+  }
+
+  .tag-btn.active .tag-btn-dot {
+    background: var(--color-accent);
+    box-shadow: 0 0 8px var(--color-accent);
+  }
+
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .post-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    opacity: 0;
+    transition: all var(--transition-base);
+  }
+
+  .post-item:hover {
+    transform: translateY(-4px);
+  }
+
+  .post-item-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .post-item:hover .post-item-glow {
+    opacity: 1;
+  }
+
+  .post-item-inner {
+    position: relative;
+    z-index: 1;
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .post-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+
+  .post-item-date {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-item-tags {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .post-item-title {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    transition: color var(--transition-fast);
+  }
+
+  .post-item:hover .post-item-title {
+    color: var(--color-accent);
+  }
+
+  .post-item-description {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--space-lg);
+    flex-grow: 1;
+  }
+
+  .post-item-footer {
+    margin-top: auto;
+  }
+
+  .read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: all var(--transition-base);
+  }
+
+  .post-item:hover .read-more {
+    color: var(--color-accent);
+    gap: var(--space-sm);
+  }
+
+  @media (max-width: 900px) {
+    .blog-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .blog-sidebar {
+      position: static;
+    }
+
+    .tags-list {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .tag-btn {
+      width: auto;
+    }
+  }
+</style>

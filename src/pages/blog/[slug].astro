@@ -1,0 +1,260 @@
+---
+import { getCollection, render } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+// 计算阅读时间
+const wordCount = post.body?.split(/\s+/).length || 0;
+const readingTime = `${Math.ceil(wordCount / 200)} 分钟阅读`;
+---
+
+<BlogLayout title={post.data.title} description={post.data.description}>
+  <article class="post">
+    {/* 返回按钮 */}
+    <a href="/blog" class="back-button animate-fade-in-up">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+      返回文章列表
+    </a>
+    
+    <header class="post-header animate-fade-in-up stagger-1">
+      <div class="post-meta">
+        <time datetime={post.data.pubDate.toISOString()} class="post-date">
+          {post.data.pubDate.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+        <span class="post-reading-time">{readingTime}</span>
+      </div>
+      <h1 class="post-title">{post.data.title}</h1>
+      <p class="post-description">{post.data.description}</p>
+      {post.data.tags.length > 0 && (
+        <div class="post-tags">
+          {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+      )}
+    </header>
+    
+    <div class="post-content animate-fade-in-up stagger-2">
+      <Content />
+    </div>
+    
+    {/* 底部导航 */}
+    <footer class="post-footer animate-fade-in-up stagger-3">
+      <a href="/blog" class="back-to-list">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        返回文章列表
+      </a>
+    </footer>
+  </article>
+</BlogLayout>
+
+<style>
+  .post {
+    position: relative;
+    padding: calc(72px + var(--space-3xl)) var(--space-lg) var(--space-4xl);
+    max-width: var(--max-width-prose);
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* 返回按钮 */
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-xl);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+  }
+
+  .back-button:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: var(--color-accent-subtle);
+    transform: translateX(-4px);
+  }
+
+  .post-header {
+    margin-bottom: var(--space-3xl);
+    padding-bottom: var(--space-2xl);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-date {
+    font-family: var(--font-mono);
+  }
+
+  .post-reading-time::before {
+    content: '·';
+    margin-right: var(--space-lg);
+  }
+
+  .post-title {
+    margin-bottom: var(--space-lg);
+    line-height: 1.2;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  .post-description {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .post-content {
+    line-height: 1.8;
+  }
+
+  .post-content :global(p) {
+    margin-bottom: var(--space-lg);
+  }
+
+  .post-content :global(h2) {
+    margin-top: var(--space-3xl);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .post-content :global(h3) {
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-md);
+  }
+
+  .post-content :global(ul),
+  .post-content :global(ol) {
+    margin-bottom: var(--space-lg);
+    padding-left: var(--space-xl);
+  }
+
+  .post-content :global(li) {
+    margin-bottom: var(--space-sm);
+  }
+
+  .post-content :global(blockquote) {
+    border-left: 3px solid var(--color-accent);
+    padding-left: var(--space-lg);
+    margin: var(--space-xl) 0;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    background: rgba(88, 166, 255, 0.05);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+
+  .post-content :global(img) {
+    max-width: 100%;
+    border-radius: var(--radius-md);
+    margin: var(--space-xl) 0;
+    border: 1px solid var(--color-border);
+  }
+
+  .post-content :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color var(--transition-fast);
+  }
+
+  .post-content :global(a:hover) {
+    text-decoration-color: var(--color-accent);
+  }
+
+  .post-content :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--color-bg-elevated);
+    padding: 0.2em 0.4em;
+    border-radius: var(--radius-sm);
+    color: var(--color-accent);
+    border: 1px solid rgba(88, 166, 255, 0.2);
+  }
+
+  .post-content :global(pre) {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    overflow-x: auto;
+    margin: var(--space-xl) 0;
+  }
+
+  .post-content :global(pre code) {
+    background: none;
+    padding: 0;
+    color: var(--color-text);
+  }
+
+  /* 底部导航 */
+  .post-footer {
+    margin-top: var(--space-4xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .back-to-list {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+  }
+
+  .back-to-list:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: var(--color-accent-subtle);
+    transform: translateX(-4px);
+  }
+
+  @media (max-width: 640px) {
+    .back-button,
+    .back-to-list {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

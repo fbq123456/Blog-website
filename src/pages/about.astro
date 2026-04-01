@@ -1,0 +1,366 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+---
+
+<BlogLayout title="关于我">
+  <section class="about-page">
+    <div class="container">
+      <div class="about-grid">
+        <!-- 左侧：个人介绍 -->
+        <div class="about-intro">
+          <div class="avatar-container">
+            <div class="avatar">
+              <span class="avatar-text">FD</span>
+            </div>
+            <div class="avatar-ring"></div>
+          </div>
+          
+          <h1 class="intro-name">前端开发者</h1>
+          <p class="intro-title">
+            <span class="mono">&lt;/&gt;</span> 热爱技术的全栈工程师
+          </p>
+          
+          <p class="intro-bio">
+            专注于现代前端技术栈，对性能优化和用户体验有执着追求。
+            喜欢探索新技术的边界，也享受将复杂问题简单化的过程。
+          </p>
+
+          <div class="social-links">
+            <a href="#" class="social-link" title="GitHub">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </a>
+            <a href="#" class="social-link" title="Twitter">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a href="#" class="social-link" title="Email">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 右侧：详细信息 -->
+        <div class="about-details">
+          <!-- 技术栈 -->
+          <div class="detail-section">
+            <h2 class="detail-title">技术栈</h2>
+            <div class="skills-grid">
+              <div class="skill-category">
+                <h3 class="skill-category-title">前端框架</h3>
+                <div class="skill-tags">
+                  <span class="skill-tag">React</span>
+                  <span class="skill-tag">Vue</span>
+                  <span class="skill-tag">Astro</span>
+                  <span class="skill-tag">Next.js</span>
+                </div>
+              </div>
+              <div class="skill-category">
+                <h3 class="skill-category-title">样式方案</h3>
+                <div class="skill-tags">
+                  <span class="skill-tag">CSS/Sass</span>
+                  <span class="skill-tag">Tailwind CSS</span>
+                  <span class="skill-tag">Styled Components</span>
+                </div>
+              </div>
+              <div class="skill-category">
+                <h3 class="skill-category-title">工具链</h3>
+                <div class="skill-tags">
+                  <span class="skill-tag">TypeScript</span>
+                  <span class="skill-tag">Vite</span>
+                  <span class="skill-tag">Webpack</span>
+                  <span class="skill-tag">Git</span>
+                </div>
+              </div>
+              <div class="skill-category">
+                <h3 class="skill-category-title">后端/其他</h3>
+                <div class="skill-tags">
+                  <span class="skill-tag">Node.js</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 联系方式 -->
+          <div class="detail-section">
+            <h2 class="detail-title">联系方式</h2>
+            <div class="contact-list">
+              <div class="contact-item">
+                <span class="contact-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="16" x="2" y="4" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                  </svg>
+                </span>
+                <span>1453050414@qq.com</span>
+              </div>
+              <div class="contact-item">
+                <span class="contact-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                </span>
+                <span>github.com/fbq123456</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 站点统计 -->
+          <div class="detail-section">
+            <h2 class="detail-title">站点信息</h2>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-value mono">5</span>
+                <span class="stat-label">篇文章</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value mono">4</span>
+                <span class="stat-label">个标签</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value mono">2026</span>
+                <span class="stat-label">建站年份</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BlogLayout>
+
+<style>
+  .about-page {
+    padding: var(--space-3xl) 0 var(--space-4xl);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: var(--space-4xl);
+    align-items: start;
+  }
+
+  /* 左侧介绍 */
+  .about-intro {
+    position: sticky;
+    top: calc(64px + var(--space-xl));
+    text-align: center;
+  }
+
+  .avatar-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto var(--space-xl);
+  }
+
+  .avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #ea580c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .avatar-text {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--color-bg);
+  }
+
+  .avatar-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px dashed var(--color-accent);
+    animation: spin 20s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .intro-name {
+    font-size: 1.75rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .intro-title {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .intro-title .mono {
+    color: var(--color-accent);
+  }
+
+  .intro-bio {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin-bottom: var(--space-xl);
+  }
+
+  .social-links {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+  }
+
+  .social-link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+
+  /* 右侧详情 */
+  .about-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  .detail-section {
+    padding: var(--space-xl);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .detail-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  /* 技能 */
+  .skills-grid {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .skill-category-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .skill-tag {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+  }
+
+  /* 联系方式 */
+  .contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .contact-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-elevated);
+    color: var(--color-accent);
+  }
+
+  /* 统计 */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-accent);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  /* 响应式 */
+  @media (max-width: 900px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+    }
+
+    .about-intro {
+      position: static;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+    }
+  }
+</style>
