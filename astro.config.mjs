@@ -9,4 +9,5 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://your-blog.vercel.app',
   integrations: [mdx(), sitemap(), react()],
+  
 });
