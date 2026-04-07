@@ -14,10 +14,10 @@ TypeScript 的类型系统是其最强大的特性之一。除了基础的类型
 条件类型允许我们根据输入类型来决定输出类型，类似三元运算符：
 
 ```typescript
-type IsString<T> = T extends string ? true : false;
+type IsString<T> = T extends string ? true : false
 
-type A = IsString<"hello">; // true
-type B = IsString<42>;      // false
+type A = IsString<'hello'> // true
+type B = IsString<42> // false
 ```
 
 ### 实用案例：提取函数返回值类型
@@ -25,7 +25,7 @@ type B = IsString<42>;      // false
 内置的 `ReturnType` 工具类型就是条件类型的典型应用：
 
 ```typescript
-type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never
 ```
 
 ## 映射类型
@@ -34,12 +34,12 @@ type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
 
 ```typescript
 type Readonly<T> = {
-  readonly [P in keyof T]: T[P];
-};
+  readonly [P in keyof T]: T[P]
+}
 
 type Partial<T> = {
-  [P in keyof T]?: T[P];
-};
+  [P in keyof T]?: T[P]
+}
 ```
 
 > TypeScript 自带的 `Partial`、`Required`、`Readonly` 等工具类型都是基于映射类型实现的。
@@ -49,10 +49,10 @@ type Partial<T> = {
 TypeScript 4.1 引入的模板字面量类型让我们可以在类型层面操作字符串：
 
 ```typescript
-type EventName<T extends string> = `on${Capitalize<T>}`;
+type EventName<T extends string> = `on${Capitalize<T>}`
 
-type ClickEvent = EventName<'click'>; // 'onClick'
-type HoverEvent = EventName<'hover'>; // 'onHover'
+type ClickEvent = EventName<'click'> // 'onClick'
+type HoverEvent = EventName<'hover'> // 'onHover'
 ```
 
 ## 实用工具类型组合
@@ -60,13 +60,13 @@ type HoverEvent = EventName<'hover'>; // 'onHover'
 ```typescript
 // 从对象类型中排除函数类型
 type NonFunction<T> = {
-  [K in keyof T]: T[K] extends Function ? never : T[K];
-}[keyof T];
+  [K in keyof T]: T[K] extends Function ? never : T[K]
+}[keyof T]
 
 // 将所有属性转换为可选（深度）
 type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}
 ```
 
 ## 总结
