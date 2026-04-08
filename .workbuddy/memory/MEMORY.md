@@ -27,7 +27,9 @@ UI 库：Element UI、Vant、Ant Design
 
 1. `threejs-three-elements.md` — Three.js 三要素：Scene、Camera、Renderer（2026-04-01）
 2. `threejs-scene-deep-dive.md` — Three.js 深入解析：Scene（场景）（2026-04-07）
-- 待写：Camera 深度解析、Renderer 深度解析
+3. `threejs-camera-deep-dive.md` — Three.js 深入解析：Camera（相机）（2026-04-08）
+4. `threejs-renderer-deep-dive.md` — Three.js 深入解析：Renderer（渲染器）（2026-04-08）
+- 待写：Geometry（几何体）深度解析
 
 ## 样式风格
 
