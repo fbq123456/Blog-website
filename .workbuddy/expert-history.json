@@ -11,7 +11,29 @@
         "usedAt": 1775023914668,
         "industryId": "all"
       }
+    ],
+    "fe764480164946aa95886fae208a0cd7": [
+      {
+        "expertId": "WechatOfficialAccountExpert",
+        "name": "Dax",
+        "profession": "微信公众号运营专家",
+        "avatarUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/avatars/03-Marketing/WechatOfficialAccountExpert/WechatOfficialAccountExpert.png",
+        "promptUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/experts/03-Marketing/WechatOfficialAccountExpert/WechatOfficialAccountExpert_zh.md",
+        "usedAt": 1775645999290,
+        "industryId": "all"
+      }
+    ],
+    "af7a7961bb154e96a0161f29ef679678": [
+      {
+        "expertId": "WechatOfficialAccountExpert",
+        "name": "Dax",
+        "profession": "微信公众号运营专家",
+        "avatarUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/avatars/03-Marketing/WechatOfficialAccountExpert/WechatOfficialAccountExpert.png",
+        "promptUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/experts/03-Marketing/WechatOfficialAccountExpert/WechatOfficialAccountExpert_zh.md",
+        "usedAt": 1775646201153,
+        "industryId": "all"
+      }
     ]
   },
-  "lastUpdated": 1775031507872
+  "lastUpdated": 1775647267927
 }
