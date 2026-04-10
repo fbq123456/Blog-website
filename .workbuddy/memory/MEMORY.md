@@ -30,7 +30,8 @@ UI 库：Element UI、Vant、Ant Design
 3. `threejs-camera-deep-dive.md` — Three.js 深入解析：Camera（相机）（2026-04-08）
 4. `threejs-renderer-deep-dive.md` — Three.js 深入解析：Renderer（渲染器）（2026-04-08）
 5. `threejs-performance-optimization.md` — Three.js 性能优化（2026-04-18）
-- 待写：Geometry（几何体）深度解析
+5. `threejs-geometry-deep-dive.md` — Three.js 深入解析：Geometry（几何体）（2026-04-10）
+- 待写：Material（材质）深度解析
 
 ### 公众号运营系列（首月排期，2026-04-08 起草）
 

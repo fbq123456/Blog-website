@@ -33,7 +33,18 @@
         "usedAt": 1775646201153,
         "industryId": "all"
       }
+    ],
+    "dde1a7faf0f0468ea4fdc7ab00709753": [
+      {
+        "expertId": "ContentCreator",
+        "name": "Kai",
+        "profession": "内容创作专家",
+        "avatarUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/avatars/03-Marketing/ContentCreator/ContentCreator.png",
+        "promptUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/experts/03-Marketing/ContentCreator/ContentCreator_zh.md",
+        "usedAt": 1775782478771,
+        "industryId": "all"
+      }
     ]
   },
-  "lastUpdated": 1775647267927
+  "lastUpdated": 1775785357047
 }
