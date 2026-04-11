@@ -29,13 +29,13 @@ UI 库：Element UI、Vant、Ant Design
 2. `threejs-scene-deep-dive.md` — Three.js 深入解析：Scene（场景）（2026-04-07）
 3. `threejs-camera-deep-dive.md` — Three.js 深入解析：Camera（相机）（2026-04-08）
 4. `threejs-renderer-deep-dive.md` — Three.js 深入解析：Renderer（渲染器）（2026-04-08）
-5. `threejs-performance-optimization.md` — Three.js 性能优化（2026-04-18）
 5. `threejs-geometry-deep-dive.md` — Three.js 深入解析：Geometry（几何体）（2026-04-10）
-- 待写：Material（材质）深度解析
+6. `threejs-material-deep-dive.md` — Three.js 深入解析：Material（材质）（2026-04-11）✅ 新生成
+- 待写：光照系统（Light）、动画系统（AnimationMixer）
 
 ### 公众号运营系列（首月排期，2026-04-08 起草）
 
-- `vue3-threejs-integration.md` — Vue3 + Three.js 集成实战（2026-04-08）
+- `vue3-threejs-integration.md` — Vue3 + Three.js 集成实战（2026-04-10）✅ 已完成
 - `programmer-hair-care-guide.md` — 程序员防脱发指南（2026-04-11）
 - `vscode-essential-plugins.md` — VS Code 必备插件清单（2026-04-15）
 - `threejs-performance-optimization.md` — Three.js 性能优化（2026-04-18）

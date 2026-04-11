@@ -1,627 +1,725 @@
 ---
-title: 'Vue3 + Three.js：如何在项目中集成3D效果'
-description: '从零开始在 Vue3 项目中集成 Three.js，完整讲解环境搭建、组件封装、响应式绑定、性能优化等实用技巧，附实战案例代码。'
-pubDate: 2026-04-08
+title: 'Vue3 + Three.js 实战：打造一个炫酷的 3D 粒子星空系统'
+description: '从零开始，在 Vue3 项目中集成 Three.js，实现一个交互式的 3D 粒子星空效果。包含完整代码、性能优化和最佳实践。'
+pubDate: 2026-04-10
 tags:
   - Vue
   - Three.js
   - 3D
-  - 前端
+  - WebGL
+  - 实战
 ---
 
-> 还在纠结 Vue3 项目怎么引入 Three.js？别慌，这篇文章手把手带你从零搭建，5分钟让你的页面拥有炫酷 3D 效果。
-
----
-
-## 前言
-
-你有没有遇到过这样的需求：
-
-- 产品经理说：「我要在首页加个 3D 产品展示」
-- 设计师发来一个炫酷的 3D 模型说：「把这个实现一下」
-- 老板看了竞品网站说：「他们的 3D 地球效果不错，我们也搞一个」
-
-如果你只会 Vue3，面对 Three.js 一脸懵，这篇文章就是为你准备的。
-
-我会从**最基础的集成方式**讲到**生产级的组件封装**，每个步骤都有可运行的代码。
+> 本文是 Vue3 与 Three.js 集成的实战教程，我们将从零搭建一个 Vue3 项目，实现一个**可交互的 3D 粒子星空系统**。文章包含完整代码、性能优化技巧和工程化最佳实践。
 
 ---
 
-## 一、为什么选择 Vue3 + Three.js？
+## 最终效果预览
 
-先回答一个常见问题：**为什么不直接用原生 JS？**
+先看一下我们要实现的效果：
 
-```
-原生 JS + Three.js          Vue3 + Three.js
-├── 全局变量满天飞           ├── 组件化管理，代码清晰
-├── 手动管理生命周期         ├── onMounted/onUnmounted 自动管理
-├── 状态同步困难             ├── ref/reactive 响应式绑定
-└── 难以复用                 └── Props/Emits 组件通信
-```
+- 🌌 数千个粒子构成的动态星空
+- ✨ 鼠标移动时粒子产生涟漪效果
+- 🎨 渐变色背景和发光效果
+- ⚡ 60fps 流畅运行
 
-Vue3 的组合式 API 天然适合 Three.js 这种「创建 → 更新 → 销毁」的生命周期管理。
+![效果预览](https://via.placeholder.com/800x400/0a0a1a/00d4ff?text=3D+Particle+Starfield+Preview)
 
 ---
 
-## 二、项目搭建
+## 一、项目初始化
 
-### 2.1 创建 Vue3 项目
+### 1.1 创建 Vue3 项目
+
+使用 Vite 快速创建项目：
 
 ```bash
-# 使用 Vite 创建项目（推荐）
-npm create vite@latest my-3d-app -- --template vue
-cd my-3d-app
+npm create vite@latest particle-starfield -- --template vue-ts
+cd particle-starfield
 npm install
 ```
 
-### 2.2 安装 Three.js
+### 1.2 安装 Three.js 及类型定义
 
 ```bash
 npm install three
+npm install -D @types/three
 ```
 
-> **提示**：不需要安装额外的 `three-vue` 之类的库，原生 Three.js 就够了。
-
-### 2.3 项目结构
-
-建议这样组织代码：
+### 1.3 项目结构
 
 ```
 src/
 ├── components/
-│   └── three/              # Three.js 相关组件
-│       ├── Scene.vue       # 3D 场景容器
-│       ├── Model.vue       # 3D 模型加载
-│       └── OrbitControls.vue # 交互控制
+│   └── ParticleStarfield.vue    # 粒子星空组件
 ├── composables/
-│   └── useThree.js         # Three.js 组合式函数
-└── utils/
-    └── three/              # 工具函数
-        └── renderer.js     # 渲染器配置
+│   └── useThree.ts              # Three.js 封装组合式函数
+├── utils/
+│   └── starfield.ts             # 星空场景逻辑
+├── App.vue
+└── main.ts
 ```
 
 ---
 
-## 三、最简集成：30 秒出效果
+## 二、核心实现
 
-先来个最基础的版本，让你快速看到效果：
+### 2.1 封装 useThree 组合式函数
 
-```vue
-<!-- Scene.vue -->
-<template>
-  <div ref="containerRef" class="three-container"></div>
-</template>
+在 Vue3 中使用 Three.js，最佳实践是将其封装成可复用的组合式函数：
 
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+```typescript
+// src/composables/useThree.ts
+import { ref, onMounted, onUnmounted, type Ref } from 'vue'
 import * as THREE from 'three'
 
-const containerRef = ref(null)
-
-// Three.js 核心对象
-let scene, camera, renderer, animationId
-
-onMounted(() => {
-  init()
-  animate()
-})
-
-onBeforeUnmount(() => {
-  // 清理资源
-  cancelAnimationFrame(animationId)
-  renderer.dispose()
-  scene.traverse((obj) => {
-    if (obj.geometry) obj.geometry.dispose()
-    if (obj.material) obj.material.dispose()
-  })
-})
-
-function init() {
-  const container = containerRef.value
-  const width = container.clientWidth
-  const height = container.clientHeight
-
-  // 1. 创建场景
-  scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x1a1a2e)
-
-  // 2. 创建相机
-  camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
-  camera.position.z = 5
-
-  // 3. 创建渲染器
-  renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setSize(width, height)
-  renderer.setPixelRatio(window.devicePixelRatio)
-  container.appendChild(renderer.domElement)
-
-  // 4. 添加物体 —— 一个旋转的立方体
-  const geometry = new THREE.BoxGeometry(1, 1, 1)
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff88 })
-  const cube = new THREE.Mesh(geometry, material)
-  scene.add(cube)
-
-  // 5. 添加灯光
-  const light = new THREE.DirectionalLight(0xffffff, 1)
-  light.position.set(5, 5, 5)
-  scene.add(light)
-
-  const ambientLight = new THREE.AmbientLight(0x404040)
-  scene.add(ambientLight)
-
-  // 6. 响应窗口变化
-  window.addEventListener('resize', onResize)
+interface UseThreeOptions {
+  antialias?: boolean
+  alpha?: boolean
+  pixelRatio?: number
 }
 
-function onResize() {
-  const container = containerRef.value
-  const width = container.clientWidth
-  const height = container.clientHeight
+export function useThree(containerRef: Ref<HTMLElement | null>, options: UseThreeOptions = {}) {
+  const { antialias = true, alpha = true, pixelRatio = 2 } = options
 
-  camera.aspect = width / height
-  camera.updateProjectionMatrix()
-  renderer.setSize(width, height)
-}
+  // ✅ 用普通变量保存 Three.js 实例，避免 ref 的响应式代理干扰 Three.js 内部对象
+  let scene: THREE.Scene | null = null
+  let camera: THREE.PerspectiveCamera | null = null
+  let renderer: THREE.WebGLRenderer | null = null
+  let animationId = 0
 
-function animate() {
-  animationId = requestAnimationFrame(animate)
+  // 暴露给外部的只读 ref（仅用于模板绑定，不直接操作）
+  const sceneRef = ref<THREE.Scene | null>(null)
+  const cameraRef = ref<THREE.PerspectiveCamera | null>(null)
 
-  // 让立方体旋转
-  scene.rotation.y += 0.01
+  // 响应式调整 —— 需要在 init 前声明，供 addEventListener 引用同一函数
+  const handleResize = () => {
+    if (!containerRef.value || !camera || !renderer) return
 
-  renderer.render(scene, camera)
-}
-</script>
+    const width = containerRef.value.clientWidth
+    const height = containerRef.value.clientHeight
 
-<style scoped>
-.three-container {
-  width: 100%;
-  height: 500px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-</style>
-```
-
-就这样！一个能在 Vue3 中运行的 Three.js 场景就搞定了。
-
----
-
-## 四、进阶：封装可复用的组合式函数
-
-上面的代码能用，但还不够优雅。把 Three.js 的逻辑抽成组合式函数，才能真正发挥 Vue3 的优势。
-
-```javascript
-// composables/useThree.js
-import { ref, onMounted, onBeforeUnmount, shallowRef } from 'vue'
-import * as THREE from 'three'
-
-export function useThree(options = {}) {
-  const containerRef = ref(null)
-  const scene = shallowRef(null)
-  const camera = shallowRef(null)
-  const renderer = shallowRef(null)
-
-  let animationId = null
-  const callbacks = []
-
-  // 注册动画回调
-  function onAnimate(callback) {
-    callbacks.push(callback)
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+    renderer.setSize(width, height)
   }
 
-  function init() {
-    const container = containerRef.value
-    if (!container) return
+  // 初始化 Three.js 环境
+  const init = () => {
+    if (!containerRef.value) return
 
+    const container = containerRef.value
     const width = container.clientWidth
     const height = container.clientHeight
 
     // 创建场景
-    const newScene = new THREE.Scene()
-    if (options.background) {
-      newScene.background = new THREE.Color(options.background)
-    }
-    scene.value = newScene
+    scene = new THREE.Scene()
+    sceneRef.value = scene
 
     // 创建相机
-    const fov = options.fov || 75
-    const near = options.near || 0.1
-    const far = options.far || 1000
-    const newCamera = new THREE.PerspectiveCamera(fov, width / height, near, far)
-    newCamera.position.set(...(options.cameraPosition || [0, 0, 5]))
-    camera.value = newCamera
+    camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+    camera.position.z = 50
+    cameraRef.value = camera
 
     // 创建渲染器
-    const newRenderer = new THREE.WebGLRenderer({
-      antialias: options.antialias ?? true,
-      alpha: options.alpha ?? false,
-    })
-    newRenderer.setSize(width, height)
-    newRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.value = newRenderer
+    renderer = new THREE.WebGLRenderer({ antialias, alpha })
+    renderer.setSize(width, height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, pixelRatio))
 
-    container.appendChild(newRenderer.domElement)
+    // 添加到 DOM
+    container.appendChild(renderer.domElement)
 
-    // 默认灯光
-    if (options.defaultLights !== false) {
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-      directionalLight.position.set(5, 5, 5)
-      newScene.add(directionalLight)
+    // 监听窗口变化
+    window.addEventListener('resize', handleResize)
+  }
 
-      const ambientLight = new THREE.AmbientLight(0x404040, 0.5)
-      newScene.add(ambientLight)
+  // 渲染循环 —— 直接使用局部变量，不经过 .value 访问，避免每帧触发响应式追踪
+  const startRender = (callback?: () => void) => {
+    if (!renderer || !scene || !camera) return
+
+    const animate = () => {
+      animationId = requestAnimationFrame(animate)
+      callback?.()
+      renderer!.render(scene!, camera!)
+    }
+    animate()
+  }
+
+  // 清理资源
+  const dispose = () => {
+    window.removeEventListener('resize', handleResize)
+    cancelAnimationFrame(animationId)
+
+    if (renderer) {
+      // ✅ 先取消挂载，再 dispose，顺序不能颠倒
+      if (containerRef.value && renderer.domElement.parentNode === containerRef.value) {
+        containerRef.value.removeChild(renderer.domElement)
+      }
+      renderer.dispose()
+      renderer = null
     }
 
-    window.addEventListener('resize', onResize)
-  }
-
-  function onResize() {
-    const container = containerRef.value
-    if (!container) return
-
-    const width = container.clientWidth
-    const height = container.clientHeight
-
-    camera.value.aspect = width / height
-    camera.value.updateProjectionMatrix()
-    renderer.value.setSize(width, height)
-  }
-
-  function animate() {
-    animationId = requestAnimationFrame(animate)
-    callbacks.forEach((cb) => cb())
-    renderer.value.render(scene.value, camera.value)
-  }
-
-  function dispose() {
-    cancelAnimationFrame(animationId)
-    window.removeEventListener('resize', onResize)
-    renderer.value.dispose()
-    scene.value.traverse((obj) => {
-      if (obj.geometry) obj.geometry.dispose()
-      if (obj.material) {
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach((m) => m.dispose())
-        } else {
-          obj.material.dispose()
-        }
+    // 清理场景中的对象（Points / Mesh 都要处理）
+    scene?.traverse(object => {
+      if (object instanceof THREE.Points || object instanceof THREE.Mesh) {
+        object.geometry.dispose()
+        const materials = Array.isArray(object.material) ? object.material : [object.material]
+        materials.forEach(m => m.dispose())
       }
     })
+
+    scene = null
+    camera = null
+    sceneRef.value = null
+    cameraRef.value = null
   }
 
-  onMounted(() => {
-    init()
-    animate()
-  })
-
-  onBeforeUnmount(() => {
-    dispose()
-  })
+  onMounted(init)
+  onUnmounted(dispose)
 
   return {
-    containerRef,
-    scene,
-    camera,
-    renderer,
-    onAnimate,
+    // ✅ 返回局部变量的 getter，确保使用方拿到的是实际实例
+    getScene: () => scene,
+    getCamera: () => camera,
+    getRenderer: () => renderer,
+    sceneRef,
+    cameraRef,
+    startRender,
+    dispose
   }
 }
 ```
 
-**使用方式：**
+### 2.2 粒子星空场景逻辑
 
-```vue
-<template>
-  <div ref="containerRef" class="scene"></div>
-</template>
+```typescript
+// src/utils/starfield.ts
+import * as THREE from 'three'
 
-<script setup>
-import { watch } from 'vue'
-import { useThree } from '@/composables/useThree'
+export interface StarfieldOptions {
+  particleCount?: number
+  particleSize?: number
+  color1?: string
+  color2?: string
+  mouseRadius?: number
+  mouseForce?: number
+}
 
-// 通过 props 控制颜色
-const props = defineProps({
-  color: { type: String, default: '#00ff88' },
-  speed: { type: Number, default: 0.02 },
-})
+export class Starfield {
+  private scene: THREE.Scene
+  private camera: THREE.PerspectiveCamera
+  private geometry: THREE.BufferGeometry
+  private material: THREE.PointsMaterial
+  private particles: THREE.Points
+  private originalPositions: Float32Array
+  private velocities: Float32Array
+  private mouse: THREE.Vector2
+  private raycaster: THREE.Raycaster
+  private mouseTarget: THREE.Vector3
+  private options: Required<StarfieldOptions>
 
-const { containerRef, scene, onAnimate } = useThree({
-  background: '#0a0a1a',
-  cameraPosition: [0, 2, 5],
-})
+  constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera, options: StarfieldOptions = {}) {
+    this.scene = scene
+    this.camera = camera
+    this.options = {
+      particleCount: 3000,
+      particleSize: 0.5,
+      color1: '#00d4ff',
+      color2: '#ff00a0',
+      mouseRadius: 25,
+      mouseForce: 2.0,
+      ...options
+    }
 
-onAnimate(() => {
-  // 每帧的动画逻辑
-  if (scene.value) {
-    scene.value.children.forEach((child) => {
-      if (child.isMesh) {
-        child.rotation.x += props.speed
-        child.rotation.y += props.speed * 0.5
+    this.mouse = new THREE.Vector2(9999, 9999)
+    this.raycaster = new THREE.Raycaster()
+    this.mouseTarget = new THREE.Vector3(9999, 9999, -80)
+
+    this.init()
+  }
+
+  private createCircleTexture(): THREE.CanvasTexture {
+    const size = 64
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')!
+
+    // 径向渐变：中心白色不透明 → 边缘完全透明，形成发光圆点效果
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+    gradient.addColorStop(0, 'rgba(255,255,255,1)')
+    gradient.addColorStop(0.3, 'rgba(255,255,255,0.8)')
+    gradient.addColorStop(0.7, 'rgba(255,255,255,0.2)')
+    gradient.addColorStop(1, 'rgba(255,255,255,0)')
+
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, size, size)
+
+    return new THREE.CanvasTexture(canvas)
+  }
+
+  private init() {
+    const { particleCount } = this.options
+
+    this.geometry = new THREE.BufferGeometry()
+    const positions = new Float32Array(particleCount * 3)
+    this.originalPositions = new Float32Array(particleCount * 3)
+    this.velocities = new Float32Array(particleCount * 3)
+    const colors = new Float32Array(particleCount * 3)
+
+    const color1 = new THREE.Color(this.options.color1)
+    const color2 = new THREE.Color(this.options.color2)
+
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3
+
+      // 随机星空分布：球壳内随机
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+      const radius = 80 + Math.random() * 50
+
+      const x = radius * Math.sin(phi) * Math.cos(theta)
+      const y = radius * Math.sin(phi) * Math.sin(theta)
+      const z = -Math.abs(radius * Math.cos(phi)) - 10
+
+      positions[i3] = x
+      positions[i3 + 1] = y
+      positions[i3 + 2] = z
+
+      this.originalPositions[i3] = x
+      this.originalPositions[i3 + 1] = y
+      this.originalPositions[i3 + 2] = z
+
+      this.velocities[i3] = (Math.random() - 0.5) * 0.02
+      this.velocities[i3 + 1] = (Math.random() - 0.5) * 0.02
+      this.velocities[i3 + 2] = (Math.random() - 0.5) * 0.02
+
+      // 多样化颜色：恒星类型模拟
+      const colorType = Math.random()
+      let finalColor: THREE.Color
+
+      if (colorType < 0.15) {
+        // 15% 蓝巨星 (极热)
+        finalColor = new THREE.Color('#aaddff')
+      } else if (colorType < 0.35) {
+        // 20% 蓝白星 (热)
+        finalColor = new THREE.Color('#88ccff')
+      } else if (colorType < 0.55) {
+        // 20% 白色 (中等)
+        finalColor = new THREE.Color('#ffffff')
+      } else if (colorType < 0.75) {
+        // 20% 黄白色 (类似太阳)
+        finalColor = new THREE.Color('#ffeebb')
+      } else if (colorType < 0.9) {
+        // 15% 橙色 (较冷)
+        finalColor = new THREE.Color('#ffcc88')
+      } else {
+        // 10% 红色 (极冷/红巨星)
+        finalColor = new THREE.Color('#ff6644')
       }
-    })
-  }
-})
 
-// 响应式更新颜色
-watch(() => props.color, (newColor) => {
-  if (scene.value) {
-    const mesh = scene.value.children.find(c => c.isMesh)
-    if (mesh) mesh.material.color.set(newColor)
+      // 随机亮度变化
+      const brightness = 0.7 + Math.random() * 0.3
+      finalColor.multiplyScalar(brightness)
+
+      colors[i3] = finalColor.r
+      colors[i3 + 1] = finalColor.g
+      colors[i3 + 2] = finalColor.b
+    }
+
+    this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+
+    this.material = new THREE.PointsMaterial({
+      size: 1.5,
+      map: this.createCircleTexture(),
+      vertexColors: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.9,
+      sizeAttenuation: true,
+      alphaTest: 0.001
+    })
+
+    this.particles = new THREE.Points(this.geometry, this.material)
+    this.scene.add(this.particles)
   }
-})
-</script>
+
+  updateMouse(normalizedX: number, normalizedY: number) {
+    this.mouse.set(normalizedX, normalizedY)
+  }
+
+  update() {
+    const { particleCount, mouseRadius, mouseForce } = this.options
+    const posAttr = this.geometry.attributes.position
+    const positions = posAttr.array as Float32Array
+
+    this.raycaster.setFromCamera(this.mouse, this.camera)
+    const ray = this.raycaster.ray
+
+    const targetZ = -80
+    const t = (targetZ - ray.origin.z) / ray.direction.z
+    if (t > 0) {
+      this.mouseTarget.copy(ray.origin).add(ray.direction.clone().multiplyScalar(t))
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3
+
+      const curX = positions[i3]
+      const curY = positions[i3 + 1]
+      const curZ = positions[i3 + 2]
+
+      const origX = this.originalPositions[i3]
+      const origY = this.originalPositions[i3 + 1]
+      const origZ = this.originalPositions[i3 + 2]
+
+      // 微扰：在原始位置附近用 sin/cos 产生"呼吸"效果，不做无限累加
+      const time = Date.now() * 0.001
+      const breathX = Math.sin(time + i * 0.1) * 0.05
+      const breathY = Math.cos(time + i * 0.13) * 0.05
+
+      const dx = curX - this.mouseTarget.x
+      const dy = curY - this.mouseTarget.y
+      const distXY = Math.sqrt(dx * dx + dy * dy)
+
+      let repelX = 0,
+        repelY = 0,
+        repelZ = 0
+      if (distXY < mouseRadius && distXY > 0.001) {
+        const force = (1 - distXY / mouseRadius) * mouseForce
+        repelX = (dx / distXY) * force
+        repelY = (dy / distXY) * force
+        repelZ = (curZ - this.mouseTarget.z > 0 ? 1 : -1) * force * 0.3
+      }
+
+      const returnForce = 0.02
+      const newX = curX + (origX - curX) * returnForce + breathX + repelX
+      const newY = curY + (origY - curY) * returnForce + breathY + repelY
+      const newZ = curZ + (origZ - curZ) * returnForce + repelZ
+
+      positions[i3] = newX
+      positions[i3 + 1] = newY
+      positions[i3 + 2] = newZ
+    }
+
+    posAttr.needsUpdate = true
+  }
+
+  dispose() {
+    this.geometry.dispose()
+    this.material.map?.dispose()
+    this.material.dispose()
+    this.scene.remove(this.particles)
+  }
+}
 ```
 
-> **重点**：这里用 `shallowRef` 而不是 `ref`，因为 Three.js 对象非常庞大，深度响应式代理会导致严重的性能问题。
-
----
-
-## 五、实战案例：3D 产品展示卡片
-
-来个贴近实际业务场景的例子 —— 3D 产品展示：
+### 2.3 Vue 组件实现
 
 ```vue
+<!-- src/components/ParticleStarfield.vue -->
 <template>
-  <div class="product-card">
-    <div ref="containerRef" class="product-3d"></div>
-    <div class="product-info">
-      <h3>{{ name }}</h3>
-      <p>{{ description }}</p>
-      <button @click="toggleAutoRotate">
-        {{ autoRotate ? '⏸ 暂停旋转' : '▶ 开始旋转' }}
-      </button>
+  <div ref="containerRef" class="starfield-container">
+    <div class="overlay">
+      <h1 class="title">3D 粒子星空</h1>
+      <p class="subtitle">移动鼠标与粒子互动</p>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { useThree } from '@/composables/useThree'
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useThree } from '../composables/useThree'
+import { Starfield } from '../utils/starfield'
 
-defineProps({
-  name: String,
-  description: String,
-  modelColor: { type: String, default: '#6366f1' },
+const containerRef = ref<HTMLElement | null>(null)
+let starfield: Starfield | null = null
+
+const { getScene, getCamera, startRender } = useThree(containerRef, {
+  antialias: true,
+  alpha: true,
+  pixelRatio: 2
 })
 
-const autoRotate = ref(true)
+// 鼠标移动处理
+const handleMouseMove = (event: MouseEvent) => {
+  if (!containerRef.value || !starfield) return
 
-const { containerRef, scene, camera, renderer, onAnimate } = useThree({
-  background: '#0f0f1a',
-  cameraPosition: [3, 3, 3],
-  fov: 45,
+  const rect = containerRef.value.getBoundingClientRect()
+  const x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+  const y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+
+  starfield.updateMouse(x, y)
+}
+
+// 触摸支持
+const handleTouchMove = (event: TouchEvent) => {
+  if (!containerRef.value || !starfield || event.touches.length === 0) return
+  event.preventDefault() // ✅ 阻止页面滚动
+
+  const rect = containerRef.value.getBoundingClientRect()
+  const touch = event.touches[0]
+  const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1
+  const y = -((touch.clientY - rect.top) / rect.height) * 2 + 1
+
+  starfield.updateMouse(x, y)
+}
+
+// ✅ useThree 的 onMounted(init) 和本组件的 onMounted 都在同一 tick 排队执行
+//    Vue 保证同一组件内 onMounted 按注册顺序执行，
+//    但 useThree 是在 setup() 中调用的（早于本 onMounted 注册），
+//    所以 useThree 的 init 一定先执行，getScene()/getCamera() 在此处已有值。
+onMounted(() => {
+  const scene = getScene()
+  const camera = getCamera()
+
+  if (!scene || !camera) {
+    console.error('[ParticleStarfield] scene or camera is null after init')
+    return
+  }
+
+  starfield = new Starfield(scene, camera, {
+    particleCount: 3000,
+    particleSize: 0.8,
+    color1: '#00d4ff',
+    color2: '#ff00a0',
+    mouseRadius: 25,
+    mouseForce: 2.0
+  })
+
+  // 启动渲染循环
+  startRender(() => {
+    starfield?.update()
+  })
+
+  // 添加事件监听
+  const el = containerRef.value
+  if (el) {
+    el.addEventListener('mousemove', handleMouseMove)
+    el.addEventListener('touchmove', handleTouchMove, { passive: false })
+  }
 })
 
-// 添加控制器
-let controls = null
-
-onAnimate(() => {
-  if (controls) controls.update()
+onUnmounted(() => {
+  const el = containerRef.value
+  if (el) {
+    el.removeEventListener('mousemove', handleMouseMove)
+    el.removeEventListener('touchmove', handleTouchMove)
+  }
+  starfield?.dispose()
+  starfield = null
 })
 </script>
 
 <style scoped>
-.product-card {
-  border-radius: 16px;
+.starfield-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
   overflow: hidden;
-  background: #0f0f1a;
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0d0d1a 100%);
 }
 
-.product-3d {
-  width: 100%;
-  height: 400px;
-  cursor: grab;
+.starfield-container :deep(canvas) {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-.product-3d:active {
-  cursor: grabbing;
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 10;
 }
 
-.product-info {
-  padding: 24px;
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #00d4ff, #ff00a0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
 }
 
-.product-info h3 {
-  font-size: 1.25rem;
-  color: #e2e8f0;
-  margin-bottom: 8px;
+.subtitle {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 2px;
 }
 
-.product-info p {
-  color: #94a3b8;
-  margin-bottom: 16px;
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+  .subtitle {
+    font-size: 1rem;
+  }
+}
+</style>
+```
+
+### 2.4 App.vue 入口
+
+```vue
+<!-- src/App.vue -->
+<template>
+  <ParticleStarfield />
+</template>
+
+<script setup lang="ts">
+import ParticleStarfield from './components/ParticleStarfield.vue'
+</script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.product-info button {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.product-info button:hover {
-  transform: scale(1.05);
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
 }
 </style>
 ```
 
 ---
 
-## 六、性能优化关键点
+## 三、性能优化技巧
 
-### 6.1 使用 shallowRef 避免深度代理
+### 3.1 粒子数量控制
 
-```javascript
-// ❌ 错误：Three.js 对象被深度代理，严重卡顿
-const scene = ref(new THREE.Scene())
+根据设备性能动态调整粒子数量：
 
-// ✅ 正确：shallowRef 只代理一层
-const scene = shallowRef(new THREE.Scene())
+```typescript
+const getParticleCount = () => {
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent)
+  const isLowPower = navigator.hardwareConcurrency <= 4
+
+  if (isMobile || isLowPower) return 1500
+  return 3000
+}
+
+const starfield = new Starfield(scene, {
+  particleCount: getParticleCount()
+  // ...
+})
 ```
 
-### 6.2 控制渲染帧率
+### 3.2 使用 requestAnimationFrame 节流
 
-不是所有场景都需要 60fps，有些 30fps 就足够了：
-
-```javascript
+```typescript
 let lastTime = 0
-const fps = 30
-const interval = 1000 / fps
+const targetFPS = 60
+const frameInterval = 1000 / targetFPS
 
-function animate(time) {
+const animate = (currentTime: number) => {
   animationId = requestAnimationFrame(animate)
 
-  if (time - lastTime > interval) {
-    lastTime = time
-    callbacks.forEach((cb) => cb())
-    renderer.value.render(scene.value, camera.value)
-  }
+  const deltaTime = currentTime - lastTime
+  if (deltaTime < frameInterval) return
+
+  lastTime = currentTime - (deltaTime % frameInterval)
+
+  // 更新和渲染
+  starfield.update()
+  renderer.render(scene, camera)
 }
 ```
 
-### 6.3 按需渲染
+### 3.3 离屏时暂停渲染
 
-当 3D 内容不可见时，停止渲染：
-
-```javascript
-import { useIntersectionObserver } from '@vueuse/core'
-
-const { containerRef } = useThree()
-
-useIntersectionObserver(containerRef, ([{ isIntersecting }]) => {
-  if (isIntersecting) {
-    animate()  // 可见时渲染
+```typescript
+// 使用 Page Visibility API
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    cancelAnimationFrame(animationId)
   } else {
-    cancelAnimationFrame(animationId)  // 不可见时暂停
+    animate()
   }
 })
 ```
 
-### 6.4 组件卸载时清理资源
+---
 
-这是最容易忽略但最重要的一点：
+## 四、扩展思路
 
-```javascript
-onBeforeUnmount(() => {
-  // 1. 停止动画循环
-  cancelAnimationFrame(animationId)
+基于这个基础，你可以进一步扩展：
 
-  // 2. 移除事件监听
-  window.removeEventListener('resize', onResize)
-
-  // 3. 释放渲染器
-  renderer.dispose()
-
-  // 4. 遍历场景释放所有几何体和材质
-  scene.traverse((obj) => {
-    if (obj.geometry) obj.geometry.dispose()
-    if (obj.material) {
-      if (Array.isArray(obj.material)) {
-        obj.material.forEach(m => m.dispose())
-      } else {
-        obj.material.dispose()
-      }
-    }
-    if (obj.texture) obj.texture.dispose()
-  })
-
-  // 5. 从 DOM 移除 Canvas
-  containerRef.value?.removeChild(renderer.domElement)
-})
-```
+| 功能           | 实现思路                                           |
+| -------------- | -------------------------------------------------- |
+| **粒子连线**   | 计算粒子间距离，小于阈值时绘制线条（类似星座效果） |
+| **音频可视化** | 结合 Web Audio API，让粒子随音乐律动               |
+| **文字粒子**   | 用 Canvas 绘制文字，采样像素位置生成粒子           |
+| **VR 支持**    | 使用 WebXR API，添加 VR 渲染支持                   |
+| **后处理效果** | 引入 EffectComposer，添加 Bloom 辉光效果           |
 
 ---
 
-## 七、常见踩坑与解决方案
+## 五、常见问题
 
-### 坑 1：Canvas 尺寸为 0
+### Q1: 粒子数量多了很卡怎么办？
 
-**现象**：页面空白，控制台报 `canvas width/height is 0`
+- 减少 `particleCount` 到 1000-1500
+- 关闭 `antialias`
+- 使用 `gl_PointSize` 替代 `PointsMaterial` 的 `size`
+- 考虑使用 `InstancedMesh` 或 GPU 粒子系统
 
-**原因**：组件 `onMounted` 时容器还没有尺寸
+### Q2: 移动端显示不正常？
 
-**解决**：加个延迟或用 `nextTick`
+- 确保设置了正确的 viewport meta 标签
+- 触摸事件使用 `touchmove` 而非 `mousemove`
+- 降低粒子数量和渲染分辨率
 
-```javascript
-import { nextTick } from 'vue'
+### Q3: 如何添加 Bloom 辉光效果？
 
-onMounted(async () => {
-  await nextTick()
-  init()
-})
-```
+需要引入 Three.js 的后处理模块（已包含在 `three` 包内，无需单独安装）：
 
-### 坑 2：路由切换后内存泄漏
+```typescript
+// ✅ 正确写法：从 three/addons 引入（three r152+ 推荐路径）
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 
-**原因**：离开页面时没有销毁 Three.js 资源
-
-**解决**：确保 `onBeforeUnmount` 中完整清理（参考上面第六部分）
-
-### 坑 3：Vue DevTools 卡死
-
-**原因**：Three.js 对象挂在了响应式数据上
-
-**解决**：用 `markRaw` 标记 Three.js 对象，阻止 Vue 代理
-
-```javascript
-import { markRaw } from 'vue'
-
-const geometry = markRaw(new THREE.BoxGeometry(1, 1, 1))
-```
-
-### 坑 4：SSR 报错
-
-**原因**：Three.js 依赖浏览器 API，在服务端渲染时会报错
-
-**解决**：动态导入 + `ClientOnly` 组件
-
-```vue
-<template>
-  <ClientOnly>
-    <Scene3D />
-  </ClientOnly>
-</template>
-
-<script setup>
-// Nuxt 3 使用 ClientOnly
-// 纯 Vue3 项目可以使用 <Suspense> + defineAsyncComponent
-import { defineAsyncComponent } from 'vue'
-
-const Scene3D = defineAsyncComponent(() =>
-  import('@/components/three/Scene3D.vue')
+// 替换渲染循环中的 renderer.render(scene, camera)
+const composer = new EffectComposer(renderer)
+composer.addPass(new RenderPass(scene, camera))
+composer.addPass(
+  new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    1.5, // strength  辉光强度
+    0.4, // radius    辉光扩散半径
+    0.85 // threshold 亮度阈值，超过才发光
+  )
 )
-</script>
+
+// 渲染循环改为：
+// composer.render();
 ```
 
 ---
 
-## 八、总结
+## 小结
 
-Vue3 + Three.js 的集成核心就三点：
+本文我们实现了一个完整的 Vue3 + Three.js 项目，涵盖了：
 
-| 要点 | 说明 |
-|------|------|
-| **生命周期管理** | `onMounted` 初始化，`onBeforeUnmount` 清理 |
-| **响应式策略** | 用 `shallowRef`/`markRaw`，避免深度代理 |
-| **性能优化** | 按需渲染、帧率控制、资源回收 |
+- ✅ Vue3 Composition API 与 Three.js 的集成模式
+- ✅ 可复用的 `useThree` 组合式函数
+- ✅ 面向对象的粒子系统封装
+- ✅ 鼠标/触摸交互实现
+- ✅ 性能优化和响应式处理
 
-掌握了这些，你就能在 Vue3 项目中自信地使用 Three.js 了。
-
----
-
-**下一期预告**：《Three.js 性能优化：让你的 3D 场景流畅运行》，敬请期待！
+这个模式可以应用到任何 Three.js 项目中，是 Vue3 与 3D 图形结合的最佳实践。
 
 ---
-
-觉得有用？**关注「有头发的帅哥程序员」**，每周分享前端干货 💻
-
-你在 Vue3 中使用 Three.js 时遇到过什么坑？**评论区聊聊** 👇
-
-转发给需要的朋友，一起进步 🚀
