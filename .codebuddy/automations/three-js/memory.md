@@ -37,6 +37,24 @@
   3. `threejs-camera-deep-dive.md`（2026-04-08）
   4. `threejs-renderer-deep-dive.md`（2026-04-08）
 
+### 2026-04-13（第五次执行 - 公众号第二轮）
+- 根据公众号运营方案续更内容，首月7篇已全部完成
+- 本次新增4篇文章（覆盖干货、日常、技术系列）：
+  1. `react-hooks-pitfalls.md` — React Hooks避坑指南（干货，2026-04-13）
+  2. `programmer-sleep-health-guide.md` — 程序员作息自救手册（日常，2026-04-16）
+  3. `css-modern-techniques.md` — CSS现代技巧20条（干货，2026-04-20）
+  4. `threejs-light-deep-dive.md` — Three.js光照系统深度解析（技术系列第7篇，2026-04-23）
+- 下次执行建议：Three.js动画系统（AnimationMixer）+ 更多日常/成长类文章
+
+### 2026-04-13（第六次执行 - 公众号第三轮）
+- 本次新增4篇文章：
+  1. `funny-bugs-collection.md` — 那些年我写过的Bug（日常，2026-04-17）
+  2. `code-review-guide.md` — Code Review避坑指南（成长，2026-04-20）
+  3. `webpack5-complete-guide.md` — Webpack 5完全指南（干货，2026-04-23）
+  4. `threejs-animation-deep-dive.md` — Three.js动画系统深度解析（技术系列第8篇，2026-04-26）
+- 公众号三轮累计：首月7篇 + 第二轮3篇 + 第三轮3篇 = 13篇
+- 下次执行：Texture纹理系统 + 继续公众号内容续更
+
 ## 文章系列规划
 
 | 序号 | 文件名 | 状态 |
@@ -45,7 +63,8 @@
 | 2 | threejs-scene-deep-dive.md | ✅ 已完成 |
 | 3 | threejs-camera-deep-dive.md | ✅ 已完成 |
 | 4 | threejs-renderer-deep-dive.md | ✅ 已完成 |
-| 5 | threejs-geometry-deep-dive.md | ⏳ 待写 |
-| 6 | threejs-material-deep-dive.md | ⏳ 待写 |
-| 7 | threejs-light-deep-dive.md | ⏳ 待写 |
-| 8 | threejs-texture-deep-dive.md | ⏳ 待写 |
+| 5 | threejs-geometry-deep-dive.md | ✅ 已完成 |
+| 6 | threejs-material-deep-dive.md | ✅ 已完成 |
+| 7 | threejs-light-deep-dive.md | ✅ 已完成 |
+| 8 | threejs-animation-deep-dive.md | ✅ 已完成 |
+| 9 | threejs-texture-deep-dive.md | ⏳ 待写 |
