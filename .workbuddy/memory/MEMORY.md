@@ -39,8 +39,10 @@ UI 库：Element UI、Vant、Ant Design
 6. `threejs-material-deep-dive.md` — Three.js 深入解析：Material（材质）（2026-04-11）
 7. `threejs-light-deep-dive.md` — Three.js 深入解析：Light（光照系统）（2026-04-13）
 8. `threejs-animation-deep-dive.md` — Three.js 深入解析：Animation（动画系统）（2026-04-26）✅ 新生成
-9. `threejs-texture-deep-dive.md` — Three.js 深入解析：Texture（纹理系统）（2026-04-27）✅ 新生成
-- 待写：粒子系统（Particles）
+9. `threejs-texture-deep-dive.md` — Three.js 深入解析：Texture（纹理系统）（2026-04-27）✅ 已完成
+10. `threejs-particles-deep-dive.md` — Three.js 深入解析：Particles（粒子系统）（2026-04-28）✅ 新生成
+11. `threejs-raycaster-deep-dive.md` — Three.js 深入解析：Raycaster（射线检测与鼠标交互）（2026-04-29）✅ 新生成
+- 待写：后期处理（Post-Processing）—— EffectComposer、Bloom、SSAO
 
 ### 公众号运营系列（首月排期，2026-04-08 起草）
 
